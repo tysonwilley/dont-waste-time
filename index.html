@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weeks Left</title>
+
+  <style type="text/css">
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: white;
+      color: #222;
+      font: normal 14px/1.2 'Helvetica', sans-serif;
+    }
+
+    #time-left {
+      font-style: italic;
+      margin: 1rem 0;
+    }
+
+    #wrapper {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .week {
+      background: #efefef;
+      border-bottom: 1px solid white;
+      border-right: 1px solid white;
+      display: block;
+      height: 10px;
+      width: 10px;
+    }
+
+    .week.checked {
+      background: #6ED0FF;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      font-style: italic;
+      opacity: 1;
+      transition: opacity 2s;
+    }
+
+    .note.hidden {
+      opacity: 0;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Don't Waste Time</h1>
+
+  <form id="start-form">
+    <label for="start">When were you born?</label>
+    <input type="date" name="start" id="start_date" value="1983-10-08" />
+    <button id="submit-button" type="submit">Go</button>
+    <div id="time-left"></div>
+  </form>
+
+  <div id="wrapper"></div>
+
+  <p id="note" class="note hidden">*Assuming a lifespan of 90 years.</p>
+
+  <script>
+    "use strict";
+
+    (function () {
+
+      function createBoxes (startDateString, years) {
+        var startDate  = new Date(startDateString);
+        var totalCount = dateDiff(startDate, dateAdd(startDate, years, 'year'), 'weeks')
+        var weeksPast  = dateDiff(startDate, new Date(), 'weeks');
+        var wrapper  = document.getElementById('wrapper');
+        var timeLeft = document.getElementById('time-left');
+        var boxSeed  = document.createElement('div');
+        var newBox;
+
+        wrapper.innerHTML = '';
+        timeLeft.textContent = 'You have lived ' + weeksPast + ' weeks. You have approx. ' + (totalCount - weeksPast) + ' left. Use them...';
+        boxSeed.classList.add('week');
+
+        for (var i = 0; i < totalCount; i += 1) {
+          newBox = boxSeed.cloneNode();
+
+          if (i < weeksPast) {
+            newBox.classList.add('checked');
+          }
+
+          wrapper.appendChild(newBox);
+        }
+
+        document.getElementById('note').classList.remove('hidden');
+      }
+
+      function dateDiff(startDate, endDate, interval) {
+        var interval = interval || 'weeks';
+        var intervalFormulas = {
+          'days'  : (1000 * 60 * 60 * 24),
+          'weeks' : (1000 * 60 * 60 * 24 * 7),
+          'months': (1000 * 60 * 60 * 24 * 30),
+          'years' : (1000 * 60 * 60 * 24 * 365)
+        };
+
+        return Math.floor((endDate.getTime() - startDate.getTime()) / intervalFormulas[interval]);
+      }
+
+      function dateAdd(date, increment, datePart) {
+        var dateParts = {
+          'year'         : date.getFullYear(),
+          'month'        : date.getMonth(),
+          'day'          : date.getDate(),
+          'hours'        : date.getHours(),
+          'minutes'      : date.getMinutes(),
+          'seconds'      : date.getSeconds(),
+          'milliseconds' : date.getMilliseconds()
+        };
+
+        dateParts[datePart] += increment;
+
+        return new Date(dateParts.year, dateParts.month, dateParts.day, dateParts.hours, dateParts.minutes, dateParts.seconds, dateParts.milliseconds);
+      }
+
+      function buttonClick (event) {
+        var formValue = document.getElementById('start_date').value;
+
+        event.preventDefault();
+        createBoxes(formValue, 90);
+      }
+
+      document.getElementById('submit-button').addEventListener('click', buttonClick, false);
+    } ());
+
+  </script>
+</body>
+</html>
